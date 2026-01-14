@@ -1,26 +1,27 @@
-# 1. Base Image: Use a lightweight Python version
+# 1. Base Image
 FROM python:3.10-slim
 
-# 2. Set the working directory inside the container
+# 2. Set working directory
 WORKDIR /app
 
-# 3. Copy dependencies file first (for better caching)
+# 3. Create the user FIRST (so we can assign permissions)
+RUN useradd -m appuser
+
+# 4. Copy requirements
 COPY requirements.txt .
 
-# 4. Install dependencies
+# 5. Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copy the rest of the application code
-COPY app/ ./app/
+# 6. Copy application code AND change ownership to appuser
+#    (This is the critical fix!)
+COPY --chown=appuser:appuser . .
 
-# 6. Security: Create a non-root user and switch to it
-# (Running as root is a security risk)
-RUN useradd -m appuser
+# 7. Switch to non-root user
 USER appuser
 
-# 7. Expose the port the app runs on
+# 8. Expose port
 EXPOSE 8000
 
-# 8. Command to run the application
-# We use 'app.main:app' because our code is inside the 'app' folder
+# 9. Run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

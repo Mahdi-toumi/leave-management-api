@@ -46,18 +46,18 @@ jobs:
         run: docker build -t leave-api .
 
       - name: Run App Container
-        # Run in background with host networking so ZAP can see it
+        # Run detached
         run: docker run -d --network="host" --name leave-api-container leave-api
 
       - name: Wait for App to Start
-        run: sleep 5
+        run: sleep 10 # Increased sleep slightly
 
-      # --- ADD THIS STEP ---
+      - name: Check Container Logs (DEBUG)
+        # This will print why the app failed if it crashes
+        run: docker logs leave-api-container
+
       - name: Fix Permissions for ZAP
-        # The ZAP container runs as a specific user (UID 1000)
-        # This command ensures it can write reports to our workspace
         run: chmod -R 777 .
-      # ---------------------
 
       - name: Run DAST Scan (OWASP ZAP)
         uses: zaproxy/action-baseline@v0.12.0
