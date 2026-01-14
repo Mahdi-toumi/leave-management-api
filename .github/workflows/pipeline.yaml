@@ -88,3 +88,21 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/leave-api:latest
+
+  # JOB 4: Kubernetes Deployment Check (The "CD" part)
+  deploy-check:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Validate Kubernetes Manifests
+        # This checks if the YAML files are valid syntax
+        # We use --dry-run=client to simulate sending them to a server
+        run: |
+          kubectl apply -f k8s/ --dry-run=client
