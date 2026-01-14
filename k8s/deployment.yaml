@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leave-api-deployment
+  labels:
+    app: leave-api
+spec:
+  replicas: 2 # We run 2 copies for high availability
+  selector:
+    matchLabels:
+      app: leave-api
+  template:
+    metadata:
+      labels:
+        app: leave-api
+    spec:
+      containers:
+        - name: leave-api
+          # IMPORTANT: Replace with your actual Docker Hub image
+          image: toumimahdi/leave-api:latest
+          ports:
+            - containerPort: 8000
+          # Resources define hardware limits (Good practice!)
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
