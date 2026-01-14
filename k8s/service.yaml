@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: leave-api-service
+spec:
+  selector:
+    app: leave-api
+  ports:
+    - protocol: TCP
+      port: 80 # The port the cluster exposes
+      targetPort: 8000 # The port our container listens on
+  type: LoadBalancer # Simulates an external IP
