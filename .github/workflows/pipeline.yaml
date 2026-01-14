@@ -1,0 +1,57 @@
+name: DevOps Pipeline
+
+# Trigger on push to main or Pull Requests
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # JOB 1: Test and Security Scan
+  test-and-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Unit Tests
+        run: pytest
+
+      - name: Run SAST Security Scan (Bandit)
+        # Scans code for vulnerabilities.
+        # '-r' = recursive, '-ll' = log level
+        run: bandit -r app/ -ll
+
+  # JOB 2: Build and Publish Docker Image
+  build-and-push:
+    needs: test-and-security # Only run if tests pass
+    runs-on: ubuntu-latest
+    # Only publish if we are merging to main (not on PRs)
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/leave-api:latest
