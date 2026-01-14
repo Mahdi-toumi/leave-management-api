@@ -8,3 +8,5 @@ tests/
 
 *.json
 *.log
+*_report.json
+*_report.html
