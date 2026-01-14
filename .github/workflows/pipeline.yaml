@@ -102,7 +102,6 @@ jobs:
         uses: azure/setup-kubectl@v3
 
       - name: Validate Kubernetes Manifests
-        # This checks if the YAML files are valid syntax
-        # We use --dry-run=client to simulate sending them to a server
+        # Added --validate=false to stop it looking for a server
         run: |
-          kubectl apply -f k8s/ --dry-run=client
+          kubectl apply -f k8s/ --dry-run=client --validate=false
