@@ -89,7 +89,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/leave-api:latest
 
-  # JOB 4: Kubernetes Deployment Check (The "CD" part)
+  # JOB 4: Kubernetes Deployment Check
   deploy-check:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -98,10 +98,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-
-      - name: Validate Kubernetes Manifests
-        # Added --validate=false to stop it looking for a server
-        run: |
-          kubectl apply -f k8s/ --dry-run=client --validate=false
+      - name: Validate Kubernetes Manifests (Kubeval)
+        # Kubeval validates your YAML against official Kubernetes schemas
+        # It works perfectly offline (without a running cluster)
+        uses: instrumenta/kubeval-action@master
+        with:
+          files: k8s/
