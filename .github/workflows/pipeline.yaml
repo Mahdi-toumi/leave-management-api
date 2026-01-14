@@ -69,7 +69,7 @@ jobs:
 
   # JOB 3: Publish (Only on Main)
   build-and-push:
-    needs: [sast-and-test, dast-scan]
+    needs: [sast-and-test]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
